@@ -52,15 +52,17 @@ class DevFrontendAgent(BaseAgent):
             api_endpoints = self._parse_api_endpoints(architecture or "")
             generated_files = self._generate_code(components, api_endpoints)
 
-            ticket_id = context.get("ticket_id", "INS-001")
-            branch_name = f"feature/{ticket_id}-frontend-implementation"
+            ticket_id = context.get("ticket_id")
+            ticket_segment = ticket_id or "no-ticket"
+            branch_name = f"feature/{ticket_segment}-frontend-implementation"
+            base_branch = self._github_base_branch()
 
             tool_calls: list[ToolCall] = [
                 self.create_tool_call(
                     "github.create_branch",
                     {
                         "branch_name": branch_name,
-                        "base_ref": "develop",
+                        "base_ref": base_branch,
                     },
                 ),
                 self.create_tool_call(
@@ -68,14 +70,14 @@ class DevFrontendAgent(BaseAgent):
                     {
                         "branch": branch_name,
                         "files": generated_files,
-                        "commit_message": f"feat(frontend): add UI components for {ticket_id}",
+                        "commit_message": f"feat(frontend): add UI components for {ticket_segment}",
                     },
                 ),
                 self.create_tool_call(
                     "github.create_pr",
                     {
                         "repo": "insure-os",
-                        "title": f"[{ticket_id}] Frontend UI implementation",
+                        "title": f"[{ticket_segment}] Frontend UI implementation",
                         "body": (
                             f"## Changes\n"
                             f"- Generated {len(generated_files)} frontend files\n"
@@ -87,17 +89,21 @@ class DevFrontendAgent(BaseAgent):
                             f"- [ ] Responsive layout check"
                         ),
                         "head": branch_name,
-                        "base": "develop",
-                    },
-                ),
-                self.create_tool_call(
-                    "jira.update_ticket",
-                    {
-                        "ticket_key": ticket_id,
-                        "fields": {"status": {"name": "In Review"}},
+                        "base": base_branch,
                     },
                 ),
             ]
+
+            if ticket_id:
+                tool_calls.append(
+                    self.create_tool_call(
+                        "jira.update_ticket",
+                        {
+                            "ticket_key": ticket_id,
+                            "fields": {"status": {"name": "In Review"}},
+                        },
+                    )
+                )
 
             output = (
                 f"Generated {len(generated_files)} frontend files with "

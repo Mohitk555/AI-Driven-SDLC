@@ -81,7 +81,7 @@ class PMAgent(BaseAgent):
                 self.create_tool_call(
                     "jira.create_ticket",
                     {
-                        "project": "INS",
+                        "project": self._jira_project_key(),
                         "issue_type": "Epic",
                         "summary": epic_title,
                         "description": req_md,

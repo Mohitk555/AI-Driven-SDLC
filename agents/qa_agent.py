@@ -113,7 +113,7 @@ class QAAgent(BaseAgent):
                     self.create_tool_call(
                         "jira.create_ticket",
                         {
-                            "project": "INS",
+                            "project": self._jira_project_key(),
                             "issue_type": "Bug",
                             "summary": f"Gap: {gap}",
                             "description": f"Requirement not covered in architecture: {gap}",
@@ -143,7 +143,7 @@ class QAAgent(BaseAgent):
             self.create_tool_call(
                 "jira.create_ticket",
                 {
-                    "project": "INS",
+                    "project": self._jira_project_key(),
                     "issue_type": "Bug",
                     "summary": message[:120],
                     "description": message,

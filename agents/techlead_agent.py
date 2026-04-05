@@ -85,8 +85,8 @@ class TechLeadAgent(BaseAgent):
             self.create_tool_call(
                 "github.create_branch",
                 {
-                    "branch_name": "feature/INS-001-initial-architecture",
-                    "base_ref": "develop",
+                    "branch_name": f"feature/{self._jira_project_key()}-initial-architecture",
+                    "base_ref": self._github_base_branch(),
                 },
             ),
         ]

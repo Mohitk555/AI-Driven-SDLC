@@ -30,7 +30,9 @@
       "Bash(curl -s -X POST http://localhost:8000/api/v1/chat -H 'Content-Type: application/json' -d '{\"message\": \"Build the backend API for claims management\"}')",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(curl -s http://localhost:8000/ready)"
+      "Bash(curl -s http://localhost:8000/ready)",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/pipeline/start -H 'Content-Type: application/json' -d '{:*)",
+      "Bash(curl:*)"
     ]
   }
 }

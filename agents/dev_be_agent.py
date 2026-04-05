@@ -51,15 +51,17 @@ class DevBackendAgent(BaseAgent):
 
             generated_files = self._generate_code(components, endpoints)
 
-            ticket_id = context.get("ticket_id", "INS-001")
-            branch_name = f"feature/{ticket_id}-backend-implementation"
+            ticket_id = context.get("ticket_id")
+            ticket_segment = ticket_id or "no-ticket"
+            branch_name = f"feature/{ticket_segment}-backend-implementation"
+            base_branch = self._github_base_branch()
 
             tool_calls: list[ToolCall] = [
                 self.create_tool_call(
                     "github.create_branch",
                     {
                         "branch_name": branch_name,
-                        "base_ref": "develop",
+                        "base_ref": base_branch,
                     },
                 ),
                 self.create_tool_call(
@@ -67,14 +69,14 @@ class DevBackendAgent(BaseAgent):
                     {
                         "branch": branch_name,
                         "files": generated_files,
-                        "commit_message": f"feat(backend): add API endpoints for {ticket_id}",
+                        "commit_message": f"feat(backend): add API endpoints for {ticket_segment}",
                     },
                 ),
                 self.create_tool_call(
                     "github.create_pr",
                     {
                         "repo": "insure-os",
-                        "title": f"[{ticket_id}] Backend API implementation",
+                        "title": f"[{ticket_segment}] Backend API implementation",
                         "body": (
                             f"## Changes\n"
                             f"- Generated {len(generated_files)} backend files\n"
@@ -85,17 +87,21 @@ class DevBackendAgent(BaseAgent):
                             f"- [ ] Verify endpoints via Swagger UI"
                         ),
                         "head": branch_name,
-                        "base": "develop",
-                    },
-                ),
-                self.create_tool_call(
-                    "jira.update_ticket",
-                    {
-                        "ticket_key": ticket_id,
-                        "fields": {"status": {"name": "In Review"}},
+                        "base": base_branch,
                     },
                 ),
             ]
+
+            if ticket_id:
+                tool_calls.append(
+                    self.create_tool_call(
+                        "jira.update_ticket",
+                        {
+                            "ticket_key": ticket_id,
+                            "fields": {"status": {"name": "In Review"}},
+                        },
+                    )
+                )
 
             output = (
                 f"Generated {len(generated_files)} backend files covering "

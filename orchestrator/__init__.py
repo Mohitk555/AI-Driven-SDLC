@@ -19,7 +19,10 @@ from orchestrator.models import (
     ToolResult,
     WorkflowState,
 )
+from orchestrator.agent_enhancer import EnhancedAgentOrchestrator
+from orchestrator.pipeline import PipelineEngine
 from orchestrator.router import AgentRouter
+from orchestrator.scheduler import TaskScheduler
 from orchestrator.state_manager import StateManager
 from orchestrator.workflow_engine import WorkflowEngine
 
@@ -28,6 +31,9 @@ __all__ = [
     "AgentRouter",
     "StateManager",
     "WorkflowEngine",
+    "PipelineEngine",
+    "TaskScheduler",
+    "EnhancedAgentOrchestrator",
     # Models
     "AgentResponse",
     "AgentStatus",

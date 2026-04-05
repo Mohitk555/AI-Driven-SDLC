@@ -31,8 +31,11 @@ A step-by-step guide to setting up, running, and using the AI-driven SDLC system
 16. [State Management & Sessions](#16-state-management--sessions)
 17. [Docker Deployment](#17-docker-deployment)
 18. [End-to-End Walkthrough](#18-end-to-end-walkthrough)
-19. [Troubleshooting](#19-troubleshooting)
-20. [API Reference](#20-api-reference)
+19. [Autonomous Pipeline](#19-autonomous-pipeline)
+20. [Scheduler — Automated Slack Updates](#20-scheduler--automated-slack-updates)
+21. [Human Intervention & Escalation](#21-human-intervention--escalation)
+22. [Troubleshooting](#22-troubleshooting)
+23. [API Reference](#23-api-reference)
 
 ---
 
@@ -1583,7 +1586,222 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 ---
 
-## 19. Troubleshooting
+## 19. Autonomous Pipeline
+
+The most powerful feature of the system. One API call drives a requirement through the **entire SDLC** automatically.
+
+### Starting a Pipeline
+
+```bash
+curl -X POST http://localhost:8000/api/v1/pipeline/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "requirement": "We need a claims management module where policyholders can submit insurance claims, upload supporting documents, and track the status of their claims in real-time"
+  }'
+```
+
+### What Happens Autonomously
+
+The pipeline chains 6 stages, each feeding output to the next:
+
+```
+Stage 1: PM Agent
+  ├── Extracts requirements from your natural language input
+  ├── Assigns MoSCoW priorities
+  ├── Generates user stories
+  ├── Writes memory/requirements.md + memory/user_stories.md
+  └── Creates Jira Epic via MCP
+
+Stage 2: Tech Lead Agent
+  ├── Reads requirements from Stage 1
+  ├── Designs system architecture (components, APIs, DB schema)
+  ├── Records Architecture Decision Records
+  ├── Writes memory/architecture.md + memory/decisions.md
+  └── Creates feature branch for architecture
+
+Stage 3: Scrum Master Agent
+  ├── Reads user stories + architecture from Stages 1-2
+  ├── Breaks stories into backend/frontend/QA tasks
+  ├── Assigns story points
+  ├── Creates Jira tickets for each task
+  ├── Writes memory/tasks.md
+  └── Sends sprint plan notification to Slack
+
+Stage 4: Development (Backend + Frontend Agents)
+  ├── For each Jira task ticket:
+  │   ├── Creates feature branch: feature/{TICKET-ID}-{description}
+  │   ├── Routes to Backend or Frontend dev based on task type
+  │   ├── Generates code based on architecture
+  │   ├── Pushes code to GitHub
+  │   ├── Updates Jira: To Do → In Progress → Code Review
+  │   └── Creates Pull Request
+  └── Passes dev outputs to QA stage
+
+Stage 5: QA Agent
+  ├── For each completed dev ticket:
+  │   ├── Generates test cases (API, acceptance, security)
+  │   ├── Validates code against requirements
+  │   ├── If PASS → moves ticket to Done
+  │   └── If FAIL → creates Bug ticket, moves back to In Progress
+  └── Writes test results to memory/test_cases.md
+
+Stage 6: DevOps Agent
+  ├── Collects all feature branches
+  ├── Generates Docker configs + CI/CD pipelines
+  ├── Merges to QA branch
+  └── Deploys
+```
+
+### Checking Pipeline Status
+
+```bash
+# List all pipelines
+curl http://localhost:8000/api/v1/pipeline
+
+# Get detailed status of a specific pipeline
+curl http://localhost:8000/api/v1/pipeline/{pipeline_id}
+```
+
+Response shows each stage's status, output, tool calls executed, and timing:
+
+```json
+{
+  "pipeline_id": "15a1dcd6...",
+  "status": "completed",
+  "current_stage": "devops",
+  "stages": [
+    {"stage": "pm", "agent_id": "pm_agent", "status": "completed", "tool_calls_count": 1},
+    {"stage": "techlead", "agent_id": "techlead_agent", "status": "completed", "tool_calls_count": 1},
+    {"stage": "scrum", "agent_id": "scrum_agent", "status": "completed", "tool_calls_count": 5},
+    {"stage": "development", "agent_id": "dev_be_agent", "status": "completed", "tool_calls_count": 8},
+    {"stage": "qa", "agent_id": "qa_agent", "status": "completed", "tool_calls_count": 3},
+    {"stage": "devops", "agent_id": "devops_agent", "status": "completed", "tool_calls_count": 2}
+  ],
+  "jira_tickets": ["AISDLC-1", "AISDLC-2", "AISDLC-3"],
+  "human_interventions": []
+}
+```
+
+### Pipeline Statuses
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Created but not started |
+| `running` | Currently executing stages |
+| `paused_for_human` | Blocked — awaiting human input |
+| `completed` | All 6 stages finished successfully |
+| `failed` | A stage failed after retries and human intervention was not provided |
+
+---
+
+## 20. Scheduler — Automated Slack Updates
+
+The scheduler runs background tasks for automated notifications.
+
+### Starting the Scheduler
+
+```bash
+curl -X POST http://localhost:8000/api/v1/scheduler/start
+```
+
+### What It Does
+
+| Job | Frequency | Action |
+|-----|-----------|--------|
+| **Daily Standup** | Every day at 5:00 PM (configurable) | Queries Jira for sprint progress, checks calendar for meetings, posts formatted summary to Slack |
+| **Hourly Status Update** | Every 60 minutes | Queries Jira for tickets that changed status in the last hour, posts changes to Slack |
+| **Pipeline Health Check** | Every 5 minutes | Checks for stuck pipeline stages (>30 min), sends alert to Slack if issues found |
+
+### Standup Message Format (Slack)
+
+```
+Daily Standup — Sprint 1
+
+Sprint Progress: 5/12 tickets done (42%)
+
+Completed Today:
+  - AISDLC-3: Claims API endpoints
+  - AISDLC-5: Claims form component
+
+In Progress:
+  - AISDLC-7: Document upload service
+
+Blocked:
+  - AISDLC-9: Payment integration (waiting for gateway credentials)
+
+Upcoming Meetings:
+  - 3:00 PM: Sprint Review
+  - 4:30 PM: Architecture Discussion
+```
+
+### Manual Triggers
+
+```bash
+# Trigger standup notification now
+curl -X POST http://localhost:8000/api/v1/scheduler/standup
+
+# Trigger status update now
+curl -X POST http://localhost:8000/api/v1/scheduler/status-update
+
+# Check scheduler status
+curl http://localhost:8000/api/v1/scheduler
+
+# Stop scheduler
+curl -X POST http://localhost:8000/api/v1/scheduler/stop
+```
+
+---
+
+## 21. Human Intervention & Escalation
+
+The system pauses and asks for human input when it cannot proceed autonomously.
+
+### When Does It Pause?
+
+1. **Agent fails after 2 retries** — stage keeps failing, pipeline pauses
+2. **Agent returns BLOCKED status** — agent explicitly requests guidance
+3. **Conflicting requirements detected** — architecture doesn't match requirements
+4. **Tool calls fail repeatedly** — external service issues
+
+### How It Works
+
+When the pipeline pauses, it stores the question and context:
+
+```bash
+# Check pipeline status — look for human_interventions
+curl http://localhost:8000/api/v1/pipeline/{pipeline_id}
+```
+
+Response when paused:
+```json
+{
+  "status": "paused_for_human",
+  "current_stage": "development",
+  "human_interventions": [
+    {
+      "stage": "development",
+      "question": "GitHub branch creation failed: repository not found. Please verify GITHUB_OWNER and GITHUB_REPO in .env",
+      "resolved": false
+    }
+  ]
+}
+```
+
+### Resuming After Human Input
+
+```bash
+curl -X POST http://localhost:8000/api/v1/pipeline/{pipeline_id}/resume \
+  -H "Content-Type: application/json" \
+  -d '{
+    "human_response": "I have updated the .env with correct GitHub credentials. Please retry."
+  }'
+```
+
+The pipeline resumes from the stage where it paused and continues through the remaining stages.
+
+---
+
+## 22. Troubleshooting
 
 ### Server won't start
 
@@ -1635,17 +1853,30 @@ rm memory/system_state.json
 
 ---
 
-## 20. API Reference
+## 23. API Reference
 
 ### Endpoints Summary
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/health` | Shallow health check → `{"status": "ok"}` |
-| `GET` | `/ready` | Deep readiness check → `{"status": "ready", "state_loaded": true}` |
-| `POST` | `/api/v1/chat` | Send a message, get agent response |
-| `GET` | `/api/v1/workflow` | Get current SDLC workflow state |
+| `GET` | `/health` | Shallow health check |
+| `GET` | `/ready` | Deep readiness check (agents, tools, scheduler, pipelines) |
+| `POST` | `/api/v1/chat` | Send a message, get single-agent response |
 | `WS` | `/ws/chat` | WebSocket for real-time chat |
+| `GET` | `/api/v1/agents` | List all registered agents with permissions |
+| `GET` | `/api/v1/workflow` | Get current SDLC workflow state |
+| `POST` | `/api/v1/workflow/advance` | Advance SDLC to next stage |
+| `POST` | `/api/v1/workflow/complete-criterion` | Mark an exit criterion as done |
+| `POST` | `/api/v1/pipeline/start` | Start autonomous SDLC pipeline |
+| `GET` | `/api/v1/pipeline` | List all pipeline runs |
+| `GET` | `/api/v1/pipeline/{id}` | Get detailed pipeline status |
+| `POST` | `/api/v1/pipeline/{id}/resume` | Resume paused pipeline with human input |
+| `POST` | `/api/v1/scheduler/start` | Start background scheduler |
+| `POST` | `/api/v1/scheduler/stop` | Stop background scheduler |
+| `GET` | `/api/v1/scheduler` | Get scheduler status and job timings |
+| `POST` | `/api/v1/scheduler/standup` | Trigger manual daily standup notification |
+| `POST` | `/api/v1/scheduler/status-update` | Trigger manual hourly status update |
+| `POST` | `/api/v1/tools/execute` | Execute a tool call directly via MCP |
 
 ### Enums
 

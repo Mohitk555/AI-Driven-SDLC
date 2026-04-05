@@ -108,7 +108,20 @@ class JiraTool(BaseTool):
             }
         }
         if "description" in params:
-            payload["fields"]["description"] = params["description"]
+            description = params["description"]
+            if isinstance(description, str):
+                payload["fields"]["description"] = {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "text", "text": description}],
+                        }
+                    ],
+                }
+            else:
+                payload["fields"]["description"] = description
         if "assignee" in params:
             payload["fields"]["assignee"] = {"accountId": params["assignee"]}
         if "labels" in params:

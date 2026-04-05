@@ -65,15 +65,17 @@ class DevOpsAgent(BaseAgent):
         files.update(self._cicd_files())
         files.update(self._deployment_files())
 
-        ticket_id = context.get("ticket_id", "INS-001")
-        branch_name = f"feature/{ticket_id}-devops-infrastructure"
+        ticket_id = context.get("ticket_id")
+        ticket_segment = ticket_id or "no-ticket"
+        branch_name = f"feature/{ticket_segment}-devops-infrastructure"
+        base_branch = self._github_base_branch()
 
         tool_calls: list[ToolCall] = [
             self.create_tool_call(
                 "github.create_branch",
                 {
-              "branch_name": branch_name,
-              "base_ref": "develop",
+                    "branch_name": branch_name,
+                    "base_ref": base_branch,
                 },
             ),
             self.create_tool_call(
@@ -81,14 +83,14 @@ class DevOpsAgent(BaseAgent):
                 {
                     "branch": branch_name,
                     "files": files,
-                    "commit_message": f"ci(infra): add Docker, CI/CD, and deployment configs for {ticket_id}",
+                    "commit_message": f"ci(infra): add Docker, CI/CD, and deployment configs for {ticket_segment}",
                 },
             ),
             self.create_tool_call(
                 "github.create_pr",
                 {
                     "repo": "insure-os",
-                    "title": f"[{ticket_id}] DevOps infrastructure setup",
+                    "title": f"[{ticket_segment}] DevOps infrastructure setup",
                     "body": (
                         "## Changes\n"
                         "- Dockerfiles for backend and frontend (multi-stage)\n"
@@ -101,7 +103,7 @@ class DevOpsAgent(BaseAgent):
                         "- [ ] Health endpoints respond"
                     ),
                     "head": branch_name,
-                    "base": "develop",
+                    "base": base_branch,
                 },
             ),
         ]

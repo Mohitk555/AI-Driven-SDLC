@@ -8,6 +8,7 @@ construction, and constitution-based validation live here.
 from __future__ import annotations
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
@@ -115,6 +116,21 @@ class BaseAgent(ABC):
                 f"Allowed: {self.permissions}"
             )
         return ToolCall(type="tool_call", tool=tool, input=input_data)
+
+    def _env(self, key: str, default: str = "") -> str:
+        return os.environ.get(key, default)
+
+    def _jira_project_key(self) -> str:
+        return self._env("JIRA_PROJECT_KEY", "INS")
+
+    def _jira_board_id(self) -> str:
+        return self._env("JIRA_BOARD_ID", "1")
+
+    def _github_base_branch(self) -> str:
+        return self._env("GITHUB_BASE_BRANCH", "main")
+
+    def _slack_default_channel(self) -> str:
+        return self._env("SLACK_DEFAULT_CHANNEL", "#general")
 
     # ------------------------------------------------------------------
     # Validation

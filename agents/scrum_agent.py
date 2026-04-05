@@ -49,8 +49,15 @@ class ScrumAgent(BaseAgent):
 
             if "sprint plan" in lower or "plan sprint" in lower:
                 return await self._create_sprint_plan(message, context)
-            if "status" in lower or "report" in lower:
-                return await self._sprint_status(context)
+            if (
+                "sprint status" in lower
+                or "ticket status" in lower
+                or "status report" in lower
+                or "report sprint" in lower
+                or "report ticket" in lower
+                or re.search(r"\bstatus of\b", lower)
+            ):
+                return await self._sprint_status(message, context)
             if "task" in lower or "break" in lower:
                 return await self._break_into_tasks(message, context)
 
@@ -92,7 +99,7 @@ class ScrumAgent(BaseAgent):
                 self.create_tool_call(
                     "jira.create_ticket",
                     {
-                        "project": "INS",
+                        "project": self._jira_project_key(),
                         "issue_type": "Task",
                         "summary": task["title"],
                         "description": task["description"],
@@ -108,7 +115,7 @@ class ScrumAgent(BaseAgent):
             self.create_tool_call(
                 "slack.send_message",
                 {
-                    "channel": "#sprint-planning",
+                    "channel": self._slack_default_channel(),
                     "text": (
                         f"Sprint {sprint_number} plan created with "
                         f"{len(tasks)} tasks. Review tasks in Jira."
@@ -122,9 +129,7 @@ class ScrumAgent(BaseAgent):
             self.create_tool_call(
                 "calendar.get_events",
                 {
-                    "calendar": "team",
-                    "days_ahead": _DEFAULT_SPRINT_DAYS,
-                    "filter": "sprint",
+                    "max_results": 10,
                 },
             )
         )
@@ -150,15 +155,29 @@ class ScrumAgent(BaseAgent):
     # Sprint status
     # ------------------------------------------------------------------
 
-    async def _sprint_status(self, context: dict[str, Any]) -> AgentResponse:
-        """Generate a sprint status report."""
-        tasks_md = self.read_memory("tasks.md")
+    async def _sprint_status(self, message: str, context: dict[str, Any]) -> AgentResponse:
+        """Generate a sprint or ticket status report."""
+        ticket_key = self._extract_ticket_key(message)
         sprint_number = context.get("sprint_number", 1)
 
-        tool_calls: list[ToolCall] = [
+        if ticket_key:
+            tool_calls: list[ToolCall] = [
+                self.create_tool_call(
+                    "jira.get_ticket",
+                    {"ticket_key": ticket_key},
+                ),
+            ]
+            output = f"Ticket status requested for {ticket_key}. Fetching latest status from Jira."
+            return self._ok(
+                output=output,
+                tool_calls=tool_calls,
+                metadata={"ticket_key": ticket_key},
+            )
+
+        tool_calls = [
             self.create_tool_call(
                 "jira.get_sprint",
-                {"board_id": context.get("jira_board_id", "1")},
+                {"board_id": context.get("jira_board_id", self._jira_board_id())},
             ),
         ]
 
@@ -172,6 +191,10 @@ class ScrumAgent(BaseAgent):
             tool_calls=tool_calls,
             metadata={"sprint_number": sprint_number},
         )
+
+    def _extract_ticket_key(self, text: str) -> str | None:
+        match = re.search(r"\b([A-Z][A-Z0-9]+-\d+)\b", text)
+        return match.group(1) if match else None
 
     # ------------------------------------------------------------------
     # Task breakdown
