@@ -1,32 +1,52 @@
 version: "3.9"
 
 services:
-  orchestrator:
-    build: .
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "8000:8000"
     env_file: .env
-    volumes:
-      - ./memory:/app/memory
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-    restart: unless-stopped
+      redis:
+        condition: service_healthy
 
-  postgres:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000
+
+  db:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: insure_os
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: insure
+      POSTGRES_PASSWORD: localdev
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U insure"]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
       retries: 5
 
 volumes:
