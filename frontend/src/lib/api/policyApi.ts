@@ -14,6 +14,7 @@ import type {
   IRiskRuleResponse,
   IRiskRuleCreateRequest,
   IRiskRuleUpdateRequest,
+  IClaimsDashboardResponse,
 } from '@/lib/types/policy';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -204,4 +205,21 @@ export async function toggleRiskRule(id: number): Promise<IRiskRuleResponse> {
   return authFetch<IRiskRuleResponse>(`/api/v1/admin/risk-rules/${id}/toggle`, {
     method: 'PATCH',
   });
+}
+
+// V5 — Claims Dashboard API
+
+export async function getClaimsDashboard(
+  dateFrom?: string,
+  dateTo?: string,
+  claimType?: string,
+): Promise<IClaimsDashboardResponse> {
+  const params = new URLSearchParams();
+  if (dateFrom) params.set('dateFrom', dateFrom);
+  if (dateTo) params.set('dateTo', dateTo);
+  if (claimType) params.set('claimType', claimType);
+  const qs = params.toString();
+  return authFetch<IClaimsDashboardResponse>(
+    `/api/v1/admin/claims/dashboard${qs ? `?${qs}` : ''}`
+  );
 }

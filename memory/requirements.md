@@ -280,14 +280,78 @@ Stakeholder requests a policy management module for auto insurance within Insure
 
 ---
 
+## V5 — Claims Analytics Dashboard
+
+### REQ-019: Claims Summary Statistics API
+- **Priority**: Must Have
+- **Description**: The system shall provide an admin API endpoint that returns aggregated claims statistics: total claims filed, count by status (submitted, under_review, approved, rejected, info_required), total and average claim amounts, and average processing time (from submitted to approved/rejected).
+- **Acceptance Criteria**:
+  - Given an admin user, when they call `GET /api/v1/admin/claims/dashboard`, then the response includes: totalClaims, countByStatus (object with each status count), totalAmount, averageAmount, and averageProcessingDays.
+  - Given optional query parameters `dateFrom` and `dateTo`, when provided, then statistics are scoped to claims created within that date range.
+  - Given an optional `claimType` filter, when provided, then statistics are scoped to that claim type only.
+  - Given no claims exist, when the endpoint is called, then all counts are 0 and averages are null.
+  - Given a non-admin user, when they call the endpoint, then the system returns 403 Forbidden.
+
+### REQ-020: Approved vs Rejected Breakdown
+- **Priority**: Must Have
+- **Description**: The dashboard API shall include an approval/rejection breakdown: number of approved claims, number of rejected claims, approval rate (percentage), and rejection rate (percentage). This allows admins to monitor decision quality and claim processing trends.
+- **Acceptance Criteria**:
+  - Given there are 8 approved and 2 rejected claims, when the dashboard is called, then approvedCount=8, rejectedCount=2, approvalRate=80.0, rejectionRate=20.0.
+  - Given no resolved claims (all still pending), when the dashboard is called, then approvalRate and rejectionRate are null (not 0).
+
+### REQ-021: Average Claim Processing Time
+- **Priority**: Must Have
+- **Description**: The system shall compute the average time in days between claim submission (created_at) and resolution (the timestamp when status changed to approved or rejected, from `claim_status_history`). Only resolved claims are included in the calculation.
+- **Acceptance Criteria**:
+  - Given claims that were resolved at varying intervals, when the dashboard is called, then averageProcessingDays reflects the mean of (resolution_timestamp - created_at) in days, rounded to 1 decimal.
+  - Given no resolved claims, when the dashboard is called, then averageProcessingDays is null.
+
+### REQ-022: Claims Dashboard UI
+- **Priority**: Must Have
+- **Description**: The system shall provide an admin dashboard page displaying claims statistics as visual cards and a summary table. The page shows: total claims card, approved/rejected ratio card, average processing time card, and a status breakdown table. Optional date range and claim type filters are available.
+- **Acceptance Criteria**:
+  - Given an admin navigates to `/admin/claims-dashboard`, when the page loads, then they see stat cards for total claims, approval/rejection rates, average processing time, and a status breakdown.
+  - Given the admin selects a date range or claim type filter, when the filter is applied, then all stats update accordingly.
+  - Given no claims exist, when the page loads, then cards show "0" or "N/A" appropriately with an empty state message.
+
+---
+
+### Non-Functional Requirements (V5 Additions)
+
+### NFR-009: Dashboard Performance
+- The dashboard statistics endpoint must complete within 3 seconds (p95), even with 10,000+ claims.
+- The frontend page must render within 2 seconds after data arrives.
+
+---
+
+### Assumptions (V5)
+1. Processing time is computed from `claims.created_at` to the first `claim_status_history` entry where `new_status` is "approved" or "rejected".
+2. Claims that are still pending (submitted, under_review, info_required) are excluded from processing time calculations.
+3. The dashboard is admin-only; regular users do not have access.
+4. Date filters use ISO date format (YYYY-MM-DD).
+
+### Out of Scope (V5)
+- Charts/graphs (card + table view only in V5; charting can be added in V6).
+- Export to CSV/PDF.
+- Real-time/WebSocket updates.
+- Per-user claim analytics.
+
+### Risks (V5)
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Aggregation query performance with large claim sets | Medium | Indexed columns (status, created_at, claim_type); single-query aggregation |
+| Processing time accuracy with missing status history | Low | Fallback to null if no resolution entry exists |
+
+---
+
 ## Open Questions
 - None blocking at this time.
 
 ---
 
 ## Traceability Seed
-- REQ-001 through REQ-018 established.
-- NFR-001 through NFR-008 established.
+- REQ-001 through REQ-022 established.
+- NFR-001 through NFR-009 established.
 - All requirements will trace forward to user stories (US-*), tasks (TASK-*), and test cases.
 
 ---

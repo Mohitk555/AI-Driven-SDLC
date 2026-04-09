@@ -5,22 +5,22 @@
 
 ## Current Run
 - Status: ACTIVE
-- Current Phase: DONE
-- Last Updated By: DevOps Agent
-- Feature: V4 — Configurable Risk Rules Engine
+- Current Phase: DEVELOPMENT
+- Last Updated By: Dev Agents
+- Feature: V5 — Claims Analytics Dashboard
 
 ## State Machine
 IDLE -> REQUIREMENTS -> ARCHITECTURE -> TASKS -> DEVELOPMENT -> TESTING -> DEPLOYMENT -> DONE
 
-## Phase Tracker (V4 — Configurable Risk Rules Engine)
+## Phase Tracker (V5 — Claims Analytics Dashboard)
 - [x] IDLE
 - [x] REQUIREMENTS
 - [x] ARCHITECTURE
 - [x] TASKS
-- [x] DEVELOPMENT
-- [x] TESTING
-- [x] DEPLOYMENT
-- [x] DONE
+- [ ] DEVELOPMENT ← current
+- [ ] TESTING
+- [ ] DEPLOYMENT
+- [ ] DONE
 
 ## Completed Steps
 - Initialized instruction-driven execution controller.

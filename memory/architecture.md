@@ -599,6 +599,58 @@ New API client functions:
 
 ---
 
+## V5 — Claims Analytics Dashboard
+
+### 3.6 Claims Dashboard Endpoint
+
+#### GET /api/v1/admin/claims/dashboard — Claims Statistics
+**Auth:** Admin role required.
+**Query Params:** `dateFrom` (ISO date, optional), `dateTo` (ISO date, optional), `claimType` (auto|health|property|life, optional)
+**Response 200:**
+```json
+{
+  "totalClaims": 150,
+  "countByStatus": {
+    "submitted": 20,
+    "under_review": 15,
+    "approved": 80,
+    "rejected": 25,
+    "info_required": 10
+  },
+  "totalAmount": 750000.00,
+  "averageAmount": 5000.00,
+  "approvedCount": 80,
+  "rejectedCount": 25,
+  "approvalRate": 76.19,
+  "rejectionRate": 23.81,
+  "averageProcessingDays": 4.3
+}
+```
+
+**Implementation Notes:**
+- `countByStatus`: SQL GROUP BY on `claims.status` with COUNT.
+- `approvalRate`/`rejectionRate`: Computed from resolved claims only (approved + rejected as denominator). Null if no resolved claims.
+- `averageProcessingDays`: JOIN `claim_status_history` to find first entry where `new_status IN ('approved','rejected')`, compute `AVG(resolution_timestamp - claims.created_at)` in days. Null if no resolved claims.
+- Date range filters apply to `claims.created_at`.
+- Claim type filter applies to `claims.claim_type`.
+- No new tables required. Queries only against existing `claims` and `claim_status_history` tables.
+
+### Frontend Architecture (V5)
+
+New page: `/admin/claims-dashboard`
+- **Stat cards row**: Total Claims (count), Approval Rate (%), Rejection Rate (%), Avg Processing Time (days), Avg Claim Amount ($)
+- **Status breakdown table**: Status | Count | Percentage
+- **Filter bar**: Date range picker (from/to), Claim type dropdown
+- Loading/error/empty states
+
+New API client function:
+- `getClaimsDashboard(dateFrom?, dateTo?, claimType?)` → GET /api/v1/admin/claims/dashboard
+
+New TypeScript types:
+- `IClaimsDashboardResponse`
+
+---
+
 ## 7. Traceability Matrix
 
 | Requirement | Architecture Component |
@@ -630,6 +682,12 @@ New API client functions:
 | REQ-018 | /admin/risk-rules list page, toggle/edit/delete UI |
 | NFR-007 | Performance targets for DB-loaded rule engine |
 | NFR-008 | audit_logs entries for all rule CRUD and toggle actions |
+
+| REQ-019 | GET /api/v1/admin/claims/dashboard, SQL aggregation on claims table |
+| REQ-020 | approvalRate/rejectionRate in dashboard response, resolved-claims denominator |
+| REQ-021 | AVG(resolution_timestamp - created_at) via claim_status_history JOIN |
+| REQ-022 | /admin/claims-dashboard page, stat cards, filter bar |
+| NFR-009 | Indexed aggregation queries, <3s p95 target |
 
 ---
 

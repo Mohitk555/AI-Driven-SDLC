@@ -302,4 +302,41 @@ The admin endpoint remains unchanged for backward compatibility.
 
 ---
 
+## ADR-016: Single Aggregation Endpoint for Claims Dashboard
+
+**Date:** 2026-04-09
+**Status:** Accepted
+**Author:** Tech Lead Agent
+
+**Context:** The dashboard needs total counts, status breakdowns, amounts, approval rates, and processing time. These could be separate endpoints or a single aggregated response.
+
+**Decision:** Single endpoint `GET /api/v1/admin/claims/dashboard` returns all statistics in one response. The backend performs all aggregations in SQL (GROUP BY, AVG, JOIN) in a single optimized query set, avoiding N+1 patterns.
+
+**Alternatives Considered:**
+- Separate endpoints per stat — more HTTP round trips, harder to keep filters consistent
+- Materialized view / pre-computed cache — over-engineered for current scale
+
+**Consequences:**
+- One API call populates the entire dashboard
+- Filters (dateFrom, dateTo, claimType) apply uniformly
+- As data grows, can add DB-level indexes or caching without API changes
+
+---
+
+## ADR-017: Processing Time from Status History Table
+
+**Date:** 2026-04-09
+**Status:** Accepted
+**Author:** Tech Lead Agent
+
+**Context:** Average processing time requires knowing when a claim was resolved. The `claims` table has `created_at` and `updated_at`, but `updated_at` could be overwritten by non-resolution changes.
+
+**Decision:** Compute resolution time by joining `claim_status_history` and finding the first entry where `new_status IN ('approved','rejected')`. This gives the exact timestamp of the resolution decision, not just the last update.
+
+**Alternatives Considered:**
+- Use `claims.updated_at` — unreliable, overwritten by any subsequent update
+- Add `resolved_at` column to claims — requires migration, duplicates data already in history
+
+---
+
 *Last updated: 2026-04-09 | Author: Tech Lead Agent*

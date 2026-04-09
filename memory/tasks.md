@@ -250,4 +250,58 @@ TASK-BE-V4-001 (model + seed)
 
 ---
 
+## V5 — Claims Analytics Dashboard Tasks
+
+### Sprint Objective (V5)
+Deliver admin claims analytics dashboard: aggregation API with filters, stat cards UI, processing time computation.
+
+### Backend Tasks (V5)
+
+| ID | Title | Linked Story | Priority | SP | Status | Depends On |
+|----|-------|-------------|----------|-----|--------|------------|
+| TASK-BE-V5-001 | Create Pydantic schemas for dashboard response | US-019, US-020, US-021 | High | 2 | To Do | — |
+| TASK-BE-V5-002 | Implement GET /api/v1/admin/claims/dashboard with aggregation queries | US-019, US-020 | High | 5 | To Do | TASK-BE-V5-001 |
+| TASK-BE-V5-003 | Implement average processing time calculation via status_history JOIN | US-021 | High | 3 | To Do | TASK-BE-V5-002 |
+| TASK-BE-V5-004 | Add date range and claim type filters to dashboard endpoint | US-019 | Medium | 2 | To Do | TASK-BE-V5-002 |
+
+### Frontend Tasks (V5)
+
+| ID | Title | Linked Story | Priority | SP | Status | Depends On |
+|----|-------|-------------|----------|-----|--------|------------|
+| TASK-FE-V5-001 | Add TypeScript types and API client for dashboard | All V5 | High | 1 | To Do | — |
+| TASK-FE-V5-002 | Build admin claims dashboard page with stat cards and status table | US-022 | High | 4 | To Do | TASK-FE-V5-001 |
+| TASK-FE-V5-003 | Add date range and claim type filters to dashboard page | US-022 | Medium | 2 | To Do | TASK-FE-V5-002 |
+
+### QA Tasks (V5)
+
+| ID | Title | Linked Story | Priority | SP | Status | Depends On |
+|----|-------|-------------|----------|-----|--------|------------|
+| TASK-QA-V5-001 | Design and execute test cases for dashboard statistics | US-019, US-020, US-021 | High | 3 | To Do | — |
+| TASK-QA-V5-002 | Test dashboard filters (date range, claim type) | US-019 | High | 2 | To Do | TASK-QA-V5-001 |
+| TASK-QA-V5-003 | Test security (non-admin access, auth) | NFR-001 | High | 1 | To Do | — |
+
+### Critical Path (V5)
+```
+TASK-BE-V5-001 (schemas) -> TASK-BE-V5-002 (aggregation endpoint)
+  -> TASK-BE-V5-003 (processing time) + TASK-BE-V5-004 (filters)
+  -> TASK-QA-V5-001 (tests) -> TASK-QA-V5-002 (filter tests)
+```
+
+### Capacity (V5)
+- **Backend**: 4 tasks, ~12 SP
+- **Frontend**: 3 tasks, ~7 SP
+- **QA**: 3 tasks, ~6 SP
+- **Total**: 10 tasks, ~25 SP
+
+### Traceability (V5)
+
+| User Story | Backend Tasks | Frontend Tasks | QA Tasks |
+|------------|--------------|----------------|----------|
+| US-019 | TASK-BE-V5-001, V5-002, V5-004 | TASK-FE-V5-001 | TASK-QA-V5-001, V5-002 |
+| US-020 | TASK-BE-V5-001, V5-002 | TASK-FE-V5-002 | TASK-QA-V5-001 |
+| US-021 | TASK-BE-V5-003 | TASK-FE-V5-002 | TASK-QA-V5-001 |
+| US-022 | — | TASK-FE-V5-002, V5-003 | — |
+
+---
+
 *Last updated: 2026-04-09 | Author: Scrum Agent*

@@ -211,3 +211,17 @@ export interface IRiskRuleUpdateRequest {
   label?: string;
   brackets?: IBracketItem[];
 }
+
+// V5 — Claims Dashboard Types
+
+export interface IClaimsDashboardResponse {
+  totalClaims: number;
+  countByStatus: Record<string, number>;
+  totalAmount: number;
+  averageAmount: number | null;
+  approvedCount: number;
+  rejectedCount: number;
+  approvalRate: number | null;
+  rejectionRate: number | null;
+  averageProcessingDays: number | null;
+}

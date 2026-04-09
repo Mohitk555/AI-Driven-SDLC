@@ -233,6 +233,52 @@
 | US-016 | REQ-016 |
 | US-017 | REQ-017 |
 | US-018 | REQ-018 |
+| US-019 | REQ-019 |
+| US-020 | REQ-020 |
+| US-021 | REQ-021 |
+| US-022 | REQ-022 |
+
+---
+
+## V5 — Claims Analytics Dashboard Stories
+
+## US-019: View Claims Summary Statistics
+- **Linked Requirement**: REQ-019
+- **Priority**: Must Have
+- **Story**: As an admin, I want to see aggregated claims statistics (total filed, counts by status, total/average amounts), so that I can monitor claims volume and trends.
+- **Acceptance Criteria**:
+  - Given I call the dashboard endpoint, when claims exist, then I see totalClaims, countByStatus (per-status counts), totalAmount, and averageAmount.
+  - Given I provide dateFrom/dateTo parameters, when the endpoint responds, then stats only reflect claims created within that range.
+  - Given I provide a claimType filter, when the endpoint responds, then stats only reflect claims of that type.
+  - Given no claims exist, when I call the endpoint, then totalClaims=0 and averages are null.
+- **Edge Cases / Negative Scenarios**:
+  - Invalid date format — 422 validation error.
+  - Non-admin user — 403 Forbidden.
+
+## US-020: View Approved vs Rejected Breakdown
+- **Linked Requirement**: REQ-020
+- **Priority**: Must Have
+- **Story**: As an admin, I want to see the approval and rejection rates for claims, so that I can assess decision quality and identify process issues.
+- **Acceptance Criteria**:
+  - Given resolved claims exist, when I view the dashboard, then I see approvedCount, rejectedCount, approvalRate (%), and rejectionRate (%).
+  - Given no resolved claims, when I view the dashboard, then rates are null (not 0).
+
+## US-021: View Average Claim Processing Time
+- **Linked Requirement**: REQ-021
+- **Priority**: Must Have
+- **Story**: As an admin, I want to see the average time it takes to process claims from submission to resolution, so that I can identify bottlenecks.
+- **Acceptance Criteria**:
+  - Given resolved claims with varying processing times, when I view the dashboard, then averageProcessingDays shows the mean in days (1 decimal).
+  - Given no resolved claims, when I view the dashboard, then averageProcessingDays is null.
+
+## US-022: Claims Dashboard Admin Page
+- **Linked Requirement**: REQ-022
+- **Priority**: Must Have
+- **Story**: As an admin, I want a visual dashboard page with stat cards and filters, so that I can quickly assess claims health at a glance.
+- **Acceptance Criteria**:
+  - Given I navigate to /admin/claims-dashboard, when the page loads, then I see cards for: Total Claims, Approved/Rejected ratio, Average Processing Time, Average Amount, and a status breakdown table.
+  - Given I apply a date range or claim type filter, when the stats reload, then all cards update.
+  - Given no claims exist, when the page loads, then cards show "0" or "N/A" with an empty state.
 
 ---
 
