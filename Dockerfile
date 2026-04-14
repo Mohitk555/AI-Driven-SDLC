@@ -1,17 +1,9 @@
-# Stage 1: Build
-FROM python:3.11-slim AS builder
-
-WORKDIR /app
-COPY pyproject.toml ./
-RUN pip install --no-cache-dir hatchling && \
-    pip install --no-cache-dir .
-
-# Stage 2: Runtime
+# Stage 1: Runtime
 FROM python:3.11-slim
 
 WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+COPY backend/requirements.txt ./backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY . .
 
 EXPOSE 8000
@@ -19,4 +11,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8000/health')" || exit 1
 
-CMD ["uvicorn", "orchestrator.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
