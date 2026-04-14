@@ -339,4 +339,38 @@ The admin endpoint remains unchanged for backward compatibility.
 
 ---
 
-*Last updated: 2026-04-09 | Author: Tech Lead Agent*
+## ADR-013: Use Recharts for Dashboard Charts
+
+**Date:** 2026-04-14
+**Status:** Accepted
+**Author:** Tech Lead Agent
+
+**Context:** V6 Admin Dashboard requires line/area charts (sales activity) and bar charts (sales analytics). Need a React-compatible charting library that supports responsive layouts, tooltips, and integrates well with Next.js and TypeScript.
+
+**Decision:** Use `recharts` as the charting library. It is React-native (built on React components), has excellent TypeScript support, is composable (Area, Bar, Line charts share common container), supports responsive containers, and has a small bundle footprint. No D3 dependency required separately.
+
+**Alternatives Considered:**
+- Chart.js + react-chartjs-2 — Canvas-based, good performance but less composable in React
+- Nivo — Beautiful but heavier bundle, more opinionated styling
+- Victory — Good React integration but less commonly used, smaller community
+- Custom SVG — Maximum control but high development effort for standard chart types
+
+---
+
+## ADR-014: Frontend-Only Dashboard with Mock Data
+
+**Date:** 2026-04-14
+**Status:** Accepted
+**Author:** Tech Lead Agent
+
+**Context:** V6 Dashboard UI is a frontend-only implementation per stakeholder directive. No backend API dependency exists for the dashboard data.
+
+**Decision:** Implement all dashboard data as mock/static data within the frontend codebase (`/lib/mock/dashboardData.ts`). Mock data is wrapped in simulated async calls to enable realistic loading states and to make future API integration a drop-in replacement.
+
+**Alternatives Considered:**
+- JSON files in `/public` — Adds network roundtrip for static data
+- MSW (Mock Service Worker) — Overkill for static mock data; better suited for API mocking during testing
+
+---
+
+*Last updated: 2026-04-14 | Author: Tech Lead Agent*

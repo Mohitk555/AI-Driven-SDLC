@@ -651,6 +651,97 @@ New TypeScript types:
 
 ---
 
+## V6 — Admin Dashboard UI (Frontend-Only, Figma-Driven)
+
+### Frontend Architecture (V6)
+
+This is a **frontend-only** feature. No backend API changes required. All data is provided via mock/static data.
+
+#### New Dependencies
+- `recharts` — Charting library for line/area and bar charts (React-native, composable, responsive)
+- `lucide-react` — Icon library for sidebar nav, header, and UI elements
+
+#### Component Hierarchy
+```
+/frontend/src
+  /app/admin/dashboard/page.tsx     — Main dashboard page (orchestrates all sections)
+  /components/dashboard/
+    KpiCard.tsx                      — Single KPI card (icon, label, value, change %, sparkline)
+    KpiCardGrid.tsx                  — Grid of 4 KPI cards
+    SalesActivityChart.tsx           — Line/area chart (General Sale) with date range filter
+    SalesAnalyticsChart.tsx          — Bar chart (Sales Analytics) with date range filter
+    RecentOrdersTable.tsx            — Orders table with status badges and Details action
+    DashboardHeader.tsx              — Header with greeting, search, notifications, avatar
+    DashboardSidebar.tsx             — Left sidebar navigation with icons
+    DashboardLayout.tsx              — Layout wrapper combining sidebar + header + content
+  /lib/mock/dashboardData.ts         — Mock data for all dashboard sections
+  /lib/types/dashboard.ts            — TypeScript interfaces for dashboard data
+```
+
+#### Data Model (TypeScript Interfaces)
+```typescript
+interface IKpiCard {
+  id: string;
+  label: string;           // e.g., "Today's Sales"
+  value: string;           // e.g., "$5,345"
+  change: number;          // percentage change, e.g., +12.5 or -3.2
+  changeLabel: string;     // e.g., "vs yesterday"
+  sparklineData: number[]; // array of numbers for sparkline trend
+  icon: string;            // icon identifier
+}
+
+interface ISalesDataPoint {
+  date: string;
+  amount: number;
+}
+
+interface ISalesAnalyticsItem {
+  label: string;
+  value: number;
+}
+
+interface IRecentOrder {
+  id: string;
+  item: string;
+  quantity: number;
+  orderDate: string;
+  amount: number;
+  status: 'PAID' | 'PENDING' | 'CANCELLED' | 'REFUNDED';
+}
+
+interface IDashboardData {
+  kpiCards: IKpiCard[];
+  salesActivity: ISalesDataPoint[];
+  salesAnalytics: ISalesAnalyticsItem[];
+  recentOrders: IRecentOrder[];
+}
+```
+
+#### State Management
+- No global state needed — each component manages its own loading/error/empty states via local `useState`.
+- Mock data is imported synchronously but wrapped in simulated async calls for realistic loading states.
+
+#### Design Tokens (from Figma)
+- **Background**: #F5F6FA (page), #FFFFFF (cards/panels)
+- **Text Primary**: #061B2B (dark heading), DM Sans font family
+- **Text Secondary**: #667085 (body/labels)
+- **Accent/Primary**: #4F46E5 (indigo for active items, charts)
+- **Success**: #22C55E (paid badge, positive change)
+- **Warning**: #F59E0B (pending badge)
+- **Error**: #EF4444 (error states, negative change)
+- **Border**: #E5E7EB (card borders, dividers)
+- **Sidebar BG**: #1E1E2D (dark sidebar)
+- **Card dimensions**: ~303x205px per KPI card, 16px gap
+- **Typography**: DM Sans, heading 28px/700, subheading 20px/400, body 14-16px/400-600
+
+#### Figma Reference
+- File key: `7HuO8t9vziGBunYKOXPdWH`
+- Node ID: `3:7`
+- Screen: Dashboard (1440x1024)
+- Sections: Header (100px), KPI row (205px), Charts row (435px), Orders table (298px)
+
+---
+
 ## 7. Traceability Matrix
 
 | Requirement | Architecture Component |
@@ -689,6 +780,14 @@ New TypeScript types:
 | REQ-022 | /admin/claims-dashboard page, stat cards, filter bar |
 | NFR-009 | Indexed aggregation queries, <3s p95 target |
 
+| REQ-023 | KpiCard + KpiCardGrid components, mock data, sparkline from recharts |
+| REQ-024 | SalesActivityChart component (recharts AreaChart), date range filter |
+| REQ-025 | SalesAnalyticsChart component (recharts BarChart), date range filter |
+| REQ-026 | RecentOrdersTable component, status badges, mock data |
+| REQ-027 | DashboardLayout + DashboardSidebar + DashboardHeader, Figma-driven layout |
+| NFR-010 | Synchronous mock data with simulated async, <1s render |
+| NFR-011 | Loading/empty/error states on all dashboard sections |
+
 ---
 
-*Last updated: 2026-04-09 | Author: Tech Lead Agent*
+*Last updated: 2026-04-14 | Author: Tech Lead Agent*

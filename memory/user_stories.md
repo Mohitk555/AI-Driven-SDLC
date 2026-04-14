@@ -282,4 +282,74 @@
 
 ---
 
-*Last updated: 2026-04-09 | Author: PM Agent*
+## V6 — Admin Dashboard UI Stories (Frontend-Only)
+
+## US-023: View Dashboard KPI Cards
+- **Linked Requirement**: REQ-023
+- **Priority**: Must Have
+- **Story**: As an admin user, I want to view KPI summary cards showing Today's Sales, Total Sales, Total Orders, and Total Customers, so that I can quickly assess business performance at a glance.
+- **Acceptance Criteria**:
+  - Given I navigate to `/admin/dashboard`, when the page loads, then I see four KPI cards with labels, values, percentage changes, and trend sparklines.
+  - Given the page is loading, when data is being fetched, then I see skeleton placeholders for each card.
+  - Given no data is available, when the page loads, then cards show "0" or "N/A" with empty state styling.
+  - Given an error occurs, when the fetch fails, then an error message with retry option is displayed.
+- **Edge Cases / Negative Scenarios**:
+  - Very large metric values — formatted with commas/abbreviations.
+  - Negative percentage changes — shown in red with down arrow.
+
+## US-024: View General Sales Activity Chart
+- **Linked Requirement**: REQ-024
+- **Priority**: Must Have
+- **Story**: As an admin user, I want to view a line/area chart of general sales activity with a date range filter, so that I can monitor sales trends over time.
+- **Acceptance Criteria**:
+  - Given I am on the dashboard, when the General Sale section loads, then I see a line/area chart with time-series data.
+  - Given I change the date range filter, when the selection is applied, then the chart updates to reflect the selected period.
+  - Given I click "View Report", when the action triggers, then a report view or navigation occurs.
+- **Edge Cases / Negative Scenarios**:
+  - No data for selected range — empty chart with informational message.
+
+## US-025: View Sales Analytics Bar Chart
+- **Linked Requirement**: REQ-025
+- **Priority**: Must Have
+- **Story**: As an admin user, I want to view a bar chart showing sales analytics breakdown, so that I can compare sales across categories.
+- **Acceptance Criteria**:
+  - Given I am on the dashboard, when the Sales Analytics section loads, then I see a bar chart with category labels and values.
+  - Given I change the date range filter, when the selection is applied, then the bar chart updates.
+- **Edge Cases / Negative Scenarios**:
+  - All values zero — bars still render at minimum height with "0" labels.
+
+## US-026: View Recent Orders Table
+- **Linked Requirement**: REQ-026
+- **Priority**: Must Have
+- **Story**: As an admin user, I want to view a table of recent orders showing ID, Item, Quantity, Order Date, Amount, and Status, so that I can monitor order activity.
+- **Acceptance Criteria**:
+  - Given I am on the dashboard, when the Recent Orders section loads, then I see a table with columns: ID, Item, Quantity, Order Date, Amount, Status, and a Details action button per row.
+  - Given an order status is "PAID", when displayed, then a green success badge is shown.
+  - Given an order status is "PENDING", when displayed, then a yellow/orange warning badge is shown.
+  - Given no orders exist, when the table renders, then an empty state with "No recent orders" message is shown.
+- **Edge Cases / Negative Scenarios**:
+  - Large number of orders — only recent orders shown (no pagination needed for dashboard view).
+
+## US-027: Dashboard Layout with Sidebar and Header
+- **Linked Requirement**: REQ-027
+- **Priority**: Must Have
+- **Story**: As an admin user, I want the dashboard to have a sidebar navigation and a header with greeting, search, and controls, so that I can navigate the admin panel and access dashboard features.
+- **Acceptance Criteria**:
+  - Given I navigate to the dashboard, when the page loads, then I see a left sidebar with navigation icons, a header with greeting text, search bar, notification icon, language selector, and user avatar.
+  - Given the layout renders, when compared to Figma, then spacing, typography hierarchy, and visual structure match the design reference.
+
+---
+
+## Traceability Matrix (V6 Additions)
+
+| User Story | Requirements |
+|------------|-------------|
+| US-023 | REQ-023 |
+| US-024 | REQ-024 |
+| US-025 | REQ-025 |
+| US-026 | REQ-026 |
+| US-027 | REQ-027 |
+
+---
+
+*Last updated: 2026-04-14 | Author: PM Agent*

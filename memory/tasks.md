@@ -9,6 +9,47 @@ Deliver the auto insurance policy management module: quote generation with risk-
 
 ---
 
+## Figma Metadata Template (Frontend Tasks)
+
+Use this block for every frontend/UI task that must match Figma screens.
+
+```yaml
+figma:
+  file_key: "<required>"
+  node_id: "<required frame/node id>"
+  screen_name: "<human-readable screen name>"
+  flow_name: "<user flow name>"
+  variants:
+    - "default"
+    - "loading"
+    - "empty"
+    - "error"
+    - "success"
+  responsive_breakpoints:
+    - "mobile"
+    - "tablet"
+    - "desktop"
+  component_refs:
+    - "<optional component node ids>"
+  style_refs:
+    - "<optional style/token refs>"
+  asset_refs:
+    - "<optional image/icon refs>"
+  acceptance_parity_checks:
+    - "layout/spacing match"
+    - "typography hierarchy match"
+    - "component/state parity"
+    - "interaction/disabled/hover parity"
+```
+
+Minimum required fields for FE task start:
+- `file_key`
+- `node_id`
+- `variants` (at least `default`, `loading`, `error`)
+- `acceptance_parity_checks`
+
+---
+
 ## Task Breakdown
 
 ### Backend Tasks
@@ -304,4 +345,72 @@ TASK-BE-V5-001 (schemas) -> TASK-BE-V5-002 (aggregation endpoint)
 
 ---
 
-*Last updated: 2026-04-09 | Author: Scrum Agent*
+## V6 — Admin Dashboard UI Tasks (Frontend-Only, Figma-Driven)
+
+### Sprint Objective (V6)
+Deliver admin dashboard UI matching Figma design: KPI cards, sales activity chart, sales analytics bar chart, recent orders table, sidebar navigation, and header — all with mock data, loading/empty/error states.
+
+### Figma Metadata (V6)
+```yaml
+figma:
+  file_key: "7HuO8t9vziGBunYKOXPdWH"
+  node_id: "3:7"
+  screen_name: "Dashboard"
+  variants:
+    - "default"
+    - "loading"
+    - "empty"
+    - "error"
+  acceptance_parity_checks:
+    - "layout/spacing match"
+    - "typography hierarchy match"
+    - "component/state parity"
+    - "visual hierarchy parity"
+```
+
+### Frontend Tasks (V6)
+
+| ID | Title | Linked Story | Priority | SP | Status | Depends On |
+|----|-------|-------------|----------|-----|--------|------------|
+| TASK-FE-V6-001 | Add recharts + lucide-react deps, TypeScript types, mock data module | All V6 | High | 3 | To Do | — |
+| TASK-FE-V6-002 | Build DashboardLayout, DashboardSidebar, and DashboardHeader components | US-027 | High | 3 | To Do | TASK-FE-V6-001 |
+| TASK-FE-V6-003 | Build KpiCard and KpiCardGrid components with loading/empty/error states | US-023 | High | 3 | To Do | TASK-FE-V6-001 |
+| TASK-FE-V6-004 | Build SalesActivityChart (line/area) with date range filter | US-024 | High | 3 | To Do | TASK-FE-V6-001 |
+| TASK-FE-V6-005 | Build SalesAnalyticsChart (bar) with date range filter | US-025 | High | 2 | To Do | TASK-FE-V6-001 |
+| TASK-FE-V6-006 | Build RecentOrdersTable with status badges and Details action | US-026 | High | 3 | To Do | TASK-FE-V6-001 |
+| TASK-FE-V6-007 | Build main Dashboard page assembling all components | All V6 | High | 2 | To Do | TASK-FE-V6-002 thru V6-006 |
+
+### QA Tasks (V6)
+
+| ID | Title | Linked Story | Priority | SP | Status | Depends On |
+|----|-------|-------------|----------|-----|--------|------------|
+| TASK-QA-V6-001 | Design test cases for dashboard KPI cards, charts, and table | All V6 | High | 2 | To Do | — |
+| TASK-QA-V6-002 | Validate UI states (loading, empty, error, default) | All V6 | High | 2 | To Do | TASK-FE-V6-007 |
+| TASK-QA-V6-003 | Validate Figma design parity (layout, spacing, typography) | All V6 | High | 2 | To Do | TASK-FE-V6-007 |
+
+### Critical Path (V6)
+```
+TASK-FE-V6-001 (deps + types + mock data)
+  -> TASK-FE-V6-002 (layout) + V6-003 (KPI) + V6-004 (line chart) + V6-005 (bar chart) + V6-006 (table)
+  -> TASK-FE-V6-007 (assemble page)
+  -> TASK-QA-V6-002 (state validation) + V6-003 (design parity)
+```
+
+### Capacity (V6)
+- **Frontend**: 7 tasks, ~19 SP
+- **QA**: 3 tasks, ~6 SP
+- **Total**: 10 tasks, ~25 SP
+
+### Traceability (V6)
+
+| User Story | Frontend Tasks | QA Tasks |
+|------------|----------------|----------|
+| US-023 | TASK-FE-V6-001, V6-003 | TASK-QA-V6-001, V6-002 |
+| US-024 | TASK-FE-V6-001, V6-004 | TASK-QA-V6-001, V6-002 |
+| US-025 | TASK-FE-V6-001, V6-005 | TASK-QA-V6-001, V6-002 |
+| US-026 | TASK-FE-V6-001, V6-006 | TASK-QA-V6-001, V6-002 |
+| US-027 | TASK-FE-V6-002 | TASK-QA-V6-003 |
+
+---
+
+*Last updated: 2026-04-14 | Author: Scrum Agent*

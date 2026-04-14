@@ -29,6 +29,9 @@ export default function RootLayout({
               <a href="/admin/policies" className="hover:text-primary-600">
                 Admin Policies
               </a>
+              <a href="/admin/dashboard" className="hover:text-primary-600">
+                Dashboard
+              </a>
             </div>
           </div>
         </nav>

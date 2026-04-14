@@ -344,16 +344,92 @@ Stakeholder requests a policy management module for auto insurance within Insure
 
 ---
 
+## V6 — Admin Dashboard UI (Frontend-Only, Figma-Driven)
+
+### REQ-023: Dashboard KPI Cards
+- **Priority**: Must Have
+- **Description**: The system shall display four KPI summary cards on the admin dashboard: Today's Sales (currency), Total Sales (currency), Total Orders (count), and Total Customers (count). Each card shows the metric value, a label, a percentage change indicator, and a sparkline/trend graph. Data is sourced from mock data (frontend-only).
+- **Acceptance Criteria**:
+  - Given the user navigates to the dashboard, when the page loads, then four KPI cards are displayed with metric label, value, percentage change, and trend sparkline.
+  - Given the page is in loading state, when data is being fetched, then skeleton placeholders are shown for each card.
+  - Given the page encounters an error, when data fetch fails, then an error state is displayed with retry option.
+
+### REQ-024: General Sales Activity Chart
+- **Priority**: Must Have
+- **Description**: The system shall display a line/area chart showing general sales activity over time. The chart includes a date range filter and a "View Report" action link. Data is from mock data.
+- **Acceptance Criteria**:
+  - Given the dashboard loads, when the General Sale section renders, then a line/area chart is displayed with time on x-axis and sales amount on y-axis.
+  - Given the user selects a date range filter, when the selection changes, then the chart data updates accordingly.
+  - Given the user clicks "View Report", when the action triggers, then a report view action is initiated.
+
+### REQ-025: Sales Analytics Bar Chart
+- **Priority**: Must Have
+- **Description**: The system shall display a bar chart showing sales analytics breakdown. The chart includes a date range filter. Data is from mock data.
+- **Acceptance Criteria**:
+  - Given the dashboard loads, when the Sales Analytics section renders, then a bar chart is displayed with categories and corresponding values.
+  - Given the user selects a different date range, when the filter changes, then the bar chart updates.
+
+### REQ-026: Recent Orders Table
+- **Priority**: Must Have
+- **Description**: The system shall display a recent orders table with columns: ID, Item, Quantity, Order Date, Amount, and Status. Status values include PAID, PENDING, and other order statuses. Each row has a "Details" action button. Data is from mock data.
+- **Acceptance Criteria**:
+  - Given the dashboard loads, when the Recent Orders section renders, then a table is displayed with columns ID, Item, Quantity, Order Date, Amount, Status, and a Details action.
+  - Given an order has status PAID, when displayed, then a green/success badge is shown.
+  - Given an order has status PENDING, when displayed, then a yellow/warning badge is shown.
+  - Given no orders exist, when the table renders, then an empty state message is shown.
+
+### REQ-027: Dashboard Layout and Navigation
+- **Priority**: Must Have
+- **Description**: The dashboard page shall follow the Figma design layout (1440px frame) with a left sidebar navigation (98px), top header with greeting, search bar, notification/language/avatar controls. The layout must be responsive and match the Figma screen's visual hierarchy.
+- **Acceptance Criteria**:
+  - Given the user navigates to the dashboard, when the page loads, then the layout matches the Figma reference: sidebar + header + KPI row + charts row + orders table.
+  - Given the dashboard renders, when inspected, then spacing, typography hierarchy, and component states match the Figma design.
+
+---
+
+### Non-Functional Requirements (V6 Additions)
+
+### NFR-010: Dashboard Rendering Performance
+- The dashboard page must render within 1 second with mock data (no API dependency).
+- All chart components must initialize within 500ms of data availability.
+
+### NFR-011: UI State Coverage
+- All dashboard sections must support loading, empty, error, and default states.
+- State transitions must be smooth with appropriate skeleton/placeholder UI.
+
+---
+
+### Assumptions (V6)
+1. This is a frontend-only implementation — no backend API dependency.
+2. All data is provided via mock/static data within the frontend codebase.
+3. Chart libraries (e.g., recharts or chart.js) may be added as dependencies.
+4. The Figma design (file key: 7HuO8t9vziGBunYKOXPdWH, node: 3:7) is the authoritative visual reference.
+5. The dashboard is accessible at `/admin/dashboard` route.
+
+### Out of Scope (V6)
+- Backend API integration (mock data only).
+- Real-time data updates.
+- Export/download functionality.
+- Mobile-specific responsive breakpoints (desktop-first).
+
+### Risks (V6)
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Chart library integration complexity | Low | Use well-supported library (recharts); fallback to simple SVG |
+| Figma design parity gaps in implementation | Medium | Fetch Figma data via MCP; validate layout/spacing/typography post-implementation |
+
+---
+
 ## Open Questions
 - None blocking at this time.
 
 ---
 
 ## Traceability Seed
-- REQ-001 through REQ-022 established.
-- NFR-001 through NFR-009 established.
+- REQ-001 through REQ-027 established.
+- NFR-001 through NFR-011 established.
 - All requirements will trace forward to user stories (US-*), tasks (TASK-*), and test cases.
 
 ---
 
-*Last updated: 2026-04-09 | Author: PM Agent*
+*Last updated: 2026-04-14 | Author: PM Agent*
