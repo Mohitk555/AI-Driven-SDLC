@@ -5,8 +5,8 @@
 
 ## Current Run
 - Status: ACTIVE
-- Current Phase: DEVELOPMENT
-- Last Updated By: Dev Agents
+- Current Phase: DEPLOYMENT
+- Last Updated By: DevOps Agent
 - Feature: V5 — Claims Analytics Dashboard
 
 ## State Machine
@@ -17,9 +17,9 @@ IDLE -> REQUIREMENTS -> ARCHITECTURE -> TASKS -> DEVELOPMENT -> TESTING -> DEPLO
 - [x] REQUIREMENTS
 - [x] ARCHITECTURE
 - [x] TASKS
-- [ ] DEVELOPMENT ← current
-- [ ] TESTING
-- [ ] DEPLOYMENT
+- [x] DEVELOPMENT
+- [x] TESTING
+- [ ] DEPLOYMENT ← current
 - [ ] DONE
 
 ## Completed Steps

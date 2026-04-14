@@ -189,4 +189,36 @@
 
 ---
 
+## V5 — Claims Analytics Dashboard Test Cases
+
+### Coverage Matrix (V5)
+
+| Requirement | User Story | Test Cases |
+|-------------|-----------|------------|
+| REQ-019 | US-019 | TC-V5-001 to TC-V5-003, TC-V5-009, TC-V5-010 |
+| REQ-020 | US-020 | TC-V5-004, TC-V5-005 |
+| REQ-021 | US-021 | TC-V5-006, TC-V5-007 |
+| REQ-022 | US-022 | TC-V5-008 |
+| NFR-001 | Security | TC-V5-011, TC-V5-012 |
+
+### Test Results Summary (V5)
+
+| Suite | Tests | Passed | Failed |
+|-------|-------|--------|--------|
+| Basic Stats | 3 | 3 | 0 |
+| Approval/Rejection | 2 | 2 | 0 |
+| Processing Time | 2 | 2 | 0 |
+| Count By Status | 1 | 1 | 0 |
+| Filters | 2 | 2 | 0 |
+| Security | 2 | 2 | 0 |
+| **Total** | **12** | **12** | **0** |
+
+### Defects (V5)
+- None found.
+
+### Go/No-Go Recommendation
+**GO** — All 12 V5 test cases passed. Full coverage of REQ-019 through REQ-022 and NFR-001/009. No defects. No regressions (89 existing tests pass).
+
+---
+
 *Last updated: 2026-04-09 | Author: QA Agent*
